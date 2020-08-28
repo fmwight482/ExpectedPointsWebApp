@@ -17,8 +17,8 @@ public class DownSeriesFootballGameRunner {
 
 		for (int i=1; i<=samples; i++) {
 			double ep = game.getExpectedPoints(i, archers, reps);
-			System.out.print("Expected points value for " + archers + " ball at the " + i + " in " + reps +
-					" attempts is " + Math.round(ep * 100) / 100);
+			System.out.printf("Expected points value for %s ball at the %d in %d attempts is %.2f",
+					archers, i, reps, Math.round(ep * 100.0) / 100.0);
 			System.out.println();
 		}
 	}
