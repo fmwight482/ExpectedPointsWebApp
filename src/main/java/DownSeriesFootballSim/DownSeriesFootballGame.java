@@ -36,7 +36,7 @@ public class DownSeriesFootballGame {
 	 * @param teamB the second team (arbitrary)
 	 * @throws FootballException if teamA and teamB are identical
 	 */
-	public DownSeriesFootballGame(DownSeriesFootballTeam teamA, DownSeriesFootballTeam teamB, Random random) throws FootballException {
+	public DownSeriesFootballGame(DownSeriesFootballTeam teamA, DownSeriesFootballTeam teamB, Random random) {
 		if (teamA.equals(teamB)) {
 			throw new FootballException("teamA and teamB have the same name");
 		}
