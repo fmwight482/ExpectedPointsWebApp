@@ -6,8 +6,8 @@ import java.util.Random;
  * A Football Team. Contains Attributes which affect how that team performs
  */
 public class DownSeriesFootballTeam {
-	private String name;
-	private Random rand;
+	private final String name;
+	private final Random rand;
 
 	/**
 	 * offensive Drive Success Rate for this team
@@ -17,22 +17,22 @@ public class DownSeriesFootballTeam {
 	/**
 	 * the percentage chance that a failed set of downs resulted in a turnover (a fumble or interception)
 	 */
-	private double turnoverPct = 0.17;
+	private final double turnoverPct = 0.17;
 
 	/**
 	 * gross average on punts by this team
 	 */
-	private int grossPuntAvg = 45;
+	private final int grossPuntAvg = 45;
 
 	/**
 	 * percentage of punts fielded by this team which are returned
 	 */
-	private double returnPct = 0.5;
+	private final double returnPct = 0.5;
 
 	/**
 	 * return average on punts returned by this team
 	 */
-	private int returnAvg = 10;
+	private final int returnAvg = 10;
 
 	public DownSeriesFootballTeam(String aName, Random aRand, double aDSR) {
 		name = aName;
