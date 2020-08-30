@@ -29,7 +29,7 @@ resource "aws_lambda_function" "down_series_football_game" {
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "DownSeriesFootballSim.DownSeriesGameHandler"
   // full execution takes ~180 seconds
-  timeout       = 60
+  timeout       = 240
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
   source_code_hash = filebase64sha256("../target/ExpectedPointsWebApp-${local.maven-version}.jar")
