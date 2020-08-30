@@ -28,6 +28,18 @@ public class DownSeriesFootballGame {
 	 */
 	private final Random rand;
 
+	/**
+	 * Storage variable for all possible down series states, to be continuously updated as "games" are played.
+	 * Replace with wrapper object for null checking?
+	 */
+	private final DownSeriesState[][] states;
+
+	/**
+	 * list of all the DownSeriesStates which are currently "active", meaning they have happened during the
+	 * current set of drives.
+	 */
+	private final List<DownSeriesState> activeStates = new ArrayList<>();
+
 	public List<DriveResult> drives = new ArrayList<>();
 
 	/**
@@ -44,6 +56,15 @@ public class DownSeriesFootballGame {
 		team2 = teamB;
 
 		rand = random;
+
+		states = new DownSeriesState[2][100];
+
+		for (int i=1; i<100; i++) {
+			states[0][i] = new DownSeriesState(team1.getName(), i);
+		}
+		for (int j=1; j<100; j++) {
+			states[1][j] = new DownSeriesState(team2.getName(), j);
+		}
 	}
 
 	/**
@@ -53,25 +74,37 @@ public class DownSeriesFootballGame {
 	 * @param reps the number of times this scenario will be run
 	 * @return the expected point value of the given situation
 	 */
-	public double getExpectedPoints(int yardline, DownSeriesFootballTeam offTeam, int reps) throws FootballException {
+	public double getExpectedPoints(int yardline, DownSeriesFootballTeam offTeam, int reps) {
 		double netPoints = 0;
 		verifyTeam(offTeam);
 
-		for (int i=0; i<reps; i++) {
-			netPoints += getNextPoints(yardline, offTeam);
+		try {
+			if (states[offTeam.getId()][yardline].arePointsFinal()) {
+				return states[offTeam.getId()][yardline].getExpectedPoints();
+			}
+			else {
+				for (int i=0; i<reps; i++) {
+					netPoints += getNextPoints(offTeam, yardline);
+				}
+				return netPoints / reps;
+			}
 		}
-		return netPoints / reps;
+		catch (Exception e) {
+			System.out.println("team = " + offTeam.getId() + ", yardline = " + yardline);
+			throw e;
+		}
 	}
 
 	/**
 	 * Get the net points for the offensive team on the next score.
 	 * Negative values mean the other team scored points.
-	 * @param yardline the current field position
 	 * @param startingOffTeam the team currently on offense
+	 * @param yardline the current field position
 	 * @return the net points for startingOffTeam on the next score
 	 */
-	private double getNextPoints(int yardline, DownSeriesFootballTeam startingOffTeam) {
+	private double getNextPoints(DownSeriesFootballTeam startingOffTeam, int yardline) {
 		double nextPoints = 0;
+		boolean hasPoints = false;
 		boolean turnover = false;
 		int driveCount = 1;
 
@@ -84,7 +117,7 @@ public class DownSeriesFootballGame {
 			defTeam = team1;
 		}
 
-		while (nextPoints == 0) {
+		while (!hasPoints) {
 			if (turnover) {
 				// Swap offense/defense
 				if (offTeam.equals(team1)) {
@@ -103,81 +136,107 @@ public class DownSeriesFootballGame {
 			}
 			println("1st and 10 " + offTeam + " from the " + yardline);
 
-			int yardsGained;
-			if (rand.nextDouble() <= getGameDsr(offTeam, yardline)) {
-				yardsGained = offTeam.getYardsOnConversion(yardline);
-				yardline -= yardsGained;
-				println(offTeam + " gained " + yardsGained + " yards and converted the down.");
-				if (yardline <= 0) {
-					// Touchdown
-					nextPoints = 6.5;
-					if (verbose) {
-						println("Touchdown, " + offTeam + "!");
-					}
-				}
+			if (states[offTeam.getId()][yardline].arePointsFinal()) {
+				nextPoints = states[offTeam.getId()][yardline].getExpectedPoints();
+				hasPoints = true;
 			}
 			else {
-				yardsGained = offTeam.getYardsOnStop(yardline);
-				if (yardsGained < 0) {
-					println(offTeam + " lost " + yardsGained + " yards and failed to convert the down.");
+				if (!activeStates.contains(states[offTeam.getId()][yardline])) {
+					activeStates.add(states[offTeam.getId()][yardline]);
 				}
-				else {
-					println(offTeam + " gained " + yardsGained + " yards but failed to convert the down");
-				}
-				int yardsToGo = 10 - yardsGained;
-				yardline -= yardsGained;
-				if (yardline >= 100) {
-					// Safety
-					nextPoints = -2.5;
-					println("Safety on " + offTeam + "!");
-				}
-				else if (rand.nextDouble() <= offTeam.getTurnoverPct()) {
-					turnover = true;
-					println(offTeam + " lost the ball! Recovered by " + defTeam);
-				}
-				else {
-					FourthDownCall call = offTeam.make4thDownCall(yardline, yardsToGo);
-					if (call.equals(FourthDownCall.PUNT)) {
-						turnover = true;
-						yardsGained = offTeam.getYardsOnPunt();
-						yardline -= yardsGained;
-						print(offTeam + " punts for " + yardsGained + " yards, ");
-						if (yardline <= 0) {
-							// Touchback
-							yardline = 20;
-							println("Touchback.");
-						} else {
-							int returnYards = defTeam.getYardsOnPuntReturn();
-							yardline += returnYards;
-							println("returned by " + defTeam + " for " + returnYards + " yards.");
-							if (yardline >= 100) {
-								// Punt return touchdown
-								nextPoints = -6.5;
-								println("Touchdown, " + defTeam + "!");
-							}
+
+				int yardsGained;
+				if (rand.nextDouble() <= getGameDsr(offTeam, yardline)) {
+					yardsGained = offTeam.getYardsOnConversion(yardline);
+					yardline -= yardsGained;
+					println(offTeam + " gained " + yardsGained + " yards and converted the down.");
+					if (yardline <= 0) {
+						// Touchdown
+						nextPoints = 6.5;
+						hasPoints = true;
+						if (verbose) {
+							println("Touchdown, " + offTeam + "!");
 						}
-					} else if (call.equals(FourthDownCall.FIELD_GOAL)) {
-						print("Field goal attempt by " + offTeam + " from " + (yardline + 17) + " yards out is ");
-						if (rand.nextDouble() <= offTeam.getFGProbability(yardline)) {
-							nextPoints = 2.5;
-							println("Good!");
-						} else {
-							println("No good!");
+					}
+				}
+				else {
+					yardsGained = offTeam.getYardsOnStop(yardline);
+					if (yardsGained < 0) {
+						println(offTeam + " lost " + yardsGained + " yards and failed to convert the down.");
+					}
+					else {
+						println(offTeam + " gained " + yardsGained + " yards but failed to convert the down");
+					}
+					int yardsToGo = 10 - yardsGained;
+					yardline -= yardsGained;
+					if (yardline >= 100) {
+						// Safety
+						nextPoints = -2.5;
+						hasPoints = true;
+						println("Safety on " + offTeam + "!");
+					}
+					else if (rand.nextDouble() <= offTeam.getTurnoverPct()) {
+						turnover = true;
+						println(offTeam + " lost the ball! Recovered by " + defTeam);
+					}
+					else {
+						FourthDownCall call = offTeam.make4thDownCall(yardline, yardsToGo);
+						if (call.equals(FourthDownCall.PUNT)) {
 							turnover = true;
-							yardline += 10;
-							if (yardline >= 100) {
-								// A missed FG in the end zone is a safety
-								nextPoints = -2.5;
-								println("Safety on " + offTeam + "!");
+							yardsGained = offTeam.getYardsOnPunt();
+							yardline -= yardsGained;
+							print(offTeam + " punts for " + yardsGained + " yards, ");
+							if (yardline <= 0) {
+								// Touchback
+								yardline = 20;
+								println("Touchback.");
+							} else {
+								int returnYards = defTeam.getYardsOnPuntReturn();
+								yardline += returnYards;
+								println("returned by " + defTeam + " for " + returnYards + " yards.");
+								if (yardline >= 100) {
+									// Punt return touchdown
+									nextPoints = -6.5;
+									hasPoints = true;
+									println("Touchdown, " + defTeam + "!");
+								}
 							}
+						} else if (call.equals(FourthDownCall.FIELD_GOAL)) {
+							print("Field goal attempt by " + offTeam + " from " + (yardline + 17) + " yards out is ");
+							if (rand.nextDouble() <= offTeam.getFGProbability(yardline)) {
+								nextPoints = 2.5;
+								hasPoints = true;
+								println("Good!");
+							} else {
+								println("No good!");
+								turnover = true;
+								yardline += 10;
+								if (yardline >= 100) {
+									// A missed FG in the end zone is a safety
+									nextPoints = -2.5;
+									hasPoints = true;
+									println("Safety on " + offTeam + "!");
+								}
+							}
+						} else {
+							println("Unanticipated 4th down conversion attempt! Fails automatically.");
+							turnover = true;
 						}
-					} else {
-						println("Unanticipated 4th down conversion attempt! Fails automatically.");
-						turnover = true;
 					}
 				}
 			}
 		}
+
+		for (DownSeriesState dss : activeStates) {
+			if (dss.getTeam().equals(offTeam.getName())) {
+				dss.addPoints(nextPoints);
+			}
+			else {
+				dss.addPoints(-1 * nextPoints);
+			}
+		}
+		activeStates.clear();
+
 		if (!offTeam.equals(startingOffTeam)) {
 			nextPoints = -1 * nextPoints;
 		}

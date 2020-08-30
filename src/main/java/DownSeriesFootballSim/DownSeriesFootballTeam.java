@@ -9,6 +9,9 @@ public class DownSeriesFootballTeam {
 	private final String name;
 	private final Random rand;
 
+	private static int nextTeamId = 0;
+	private final int teamId;
+
 	/**
 	 * offensive Drive Success Rate for this team
 	 */
@@ -34,7 +37,9 @@ public class DownSeriesFootballTeam {
 	 */
 	private final int returnAvg = 10;
 
-	public DownSeriesFootballTeam(String aName, Random aRand, double aDSR) {
+	public DownSeriesFootballTeam(String aName, double aDSR, Random aRand) {
+		teamId = nextTeamId;
+		nextTeamId++;
 		name = aName;
 		rand = aRand;
 		dsr = aDSR;
@@ -42,6 +47,10 @@ public class DownSeriesFootballTeam {
 
 	public String getName() {
 		return name;
+	}
+
+	public int getId() {
+		return teamId;
 	}
 
 	/**
@@ -131,7 +140,7 @@ public class DownSeriesFootballTeam {
 			yards = 10 + rand.nextInt(16);
 		}
 		else {
-			yards = 10 + rand.nextInt(Math.max(1, yardline - 9));
+			yards = Math.min(10, yardline) + rand.nextInt(Math.max(1, yardline - 9));
 		}
 
 		return yards;
@@ -141,20 +150,23 @@ public class DownSeriesFootballTeam {
 	 * Returns the total yards gained on an unsuccessful conversion attempt.
 	 * Range is -5 to 9, skewed towards 3 when 5 or more yards from your own goal.
 	 * When closer to your own goal, range is own goal to 9 skewed towards the median.
+	 * When within 10 of the opponent goal, range is yardline-1 to -5 skewed towards the median.
 	 * @param yardline the current field position of this team
 	 * @return the total yards gained
 	 */
 	public int getYardsOnStop(int yardline) {
 		int yards;
 		int maxLoss = Math.min(5, 100 - yardline);
-		yards = rand.nextInt(5 + maxLoss / 2 + maxLoss % 2) + rand.nextInt(6 + maxLoss / 2) - maxLoss;
+		int maxGain = Math.min(9, yardline - 1);
+		yards = rand.nextInt(maxGain / 2 + maxLoss / 2 + maxLoss % 2) +
+				rand.nextInt(maxGain / 2 + maxGain % 2 + maxLoss / 2) - maxLoss;
 		return yards;
 	}
 
 	/**
 	 * Equals method checks if the names of the two teams are identical.
 	 * @param o object to be compared
-	 * @return true if the given object is a SimpleFootballSim.DownSeriesSim.DownSeriesFootballTeam with the same name
+	 * @return true if the given object is a DownSeriesFootballTeam with the same name
 	 */
 	public boolean equals(Object o) {
 		if (o instanceof DownSeriesFootballTeam) {
