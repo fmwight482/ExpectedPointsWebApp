@@ -30,6 +30,7 @@ resource "aws_lambda_function" "down_series_football_game" {
   handler       = "DownSeriesFootballSim.DownSeriesGameHandler"
   // full execution takes ~180 seconds
   timeout       = 240
+  memory_size   = 1024
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
   source_code_hash = filebase64sha256("../target/ExpectedPointsWebApp-${local.maven-version}.jar")

@@ -6,7 +6,7 @@ package DownSeriesFootballSim;
 public class DownSeriesState {
 	/**
 	 * The number of terminating series involving this state before we consider it's expected point value
-	 * to be final.
+	 * to be final. 100,000 seems to give reliable results.
 	 */
 	private static final int reps = 100000;
 
