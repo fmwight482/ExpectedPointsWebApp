@@ -35,5 +35,7 @@ public class DownSeriesFootballGameRunner {
 
 	public static void main(String[] args) {
 		executeGames(100000, "BAL", 0.79, "OPP", 0.67);
+		//executeGames(100000, "NE", 0.70, "OPP", 0.61);
+		//executeGames(100000, "ATL", 0.67, "DRW", 0.67);
 	}
 }
