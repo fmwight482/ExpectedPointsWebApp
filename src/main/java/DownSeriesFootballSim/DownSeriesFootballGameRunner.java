@@ -4,7 +4,8 @@ import java.util.Random;
 
 public class DownSeriesFootballGameRunner {
 
-	public static void executeGames(int reps, String name1, double dsr1, String name2, double dsr2)
+	public static void executeGames(int reps, String name1, double dsr1, String name2, double dsr2,
+	                                boolean verbose)
 			throws FootballException {
 		Random rand = new Random();
 
@@ -16,26 +17,34 @@ public class DownSeriesFootballGameRunner {
 		// Get values for yard lines 1-99
 		int samples = 99;
 
-		System.out.println("**** " + team1 + " ****");
+		if (verbose) {
+			System.out.println("**** " + team1 + " ****");
+		}
 		for (int i=1; i<=samples; i++) {
 			double ep = game.getExpectedPoints(i, team1, reps);
-			System.out.printf("Expected points value for %s ball at the %d in %d attempts is %.2f",
-					team1, i, reps, Math.round(ep * 100.0) / 100.0);
-			System.out.println();
+			if (verbose) {
+				System.out.printf("Expected points value for %s ball at the %d in %d attempts is %.2f",
+						team1, i, reps, Math.round(ep * 100.0) / 100.0);
+				System.out.println();
+			}
 		}
 
-		System.out.println("**** " + team2 + " ****");
+		if (verbose) {
+			System.out.println("**** " + team2 + " ****");
+		}
 		for (int i=1; i<=samples; i++) {
 			double ep = game.getExpectedPoints(i, team2, reps);
-			System.out.printf("Expected points value for %s ball at the %d in %d attempts is %.2f",
-					team2, i, reps, Math.round(ep * 100.0) / 100.0);
-			System.out.println();
+			if (verbose) {
+				System.out.printf("Expected points value for %s ball at the %d in %d attempts is %.2f",
+						team2, i, reps, Math.round(ep * 100.0) / 100.0);
+				System.out.println();
+			}
 		}
 	}
 
 	public static void main(String[] args) {
-		executeGames(100000, "BAL", 0.79, "OPP", 0.67);
-		//executeGames(100000, "NE", 0.70, "OPP", 0.61);
-		//executeGames(100000, "ATL", 0.67, "DRW", 0.67);
+		executeGames(100000, "BAL", 0.79, "OPP", 0.67, true);
+		//executeGames(100000, "NE", 0.70, "OPP", 0.61, true);
+		//executeGames(100000, "ATL", 0.67, "DRW", 0.67, true);
 	}
 }

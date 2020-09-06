@@ -15,7 +15,7 @@ public class DownSeriesGameHandler implements RequestHandler<Map<String, String>
 		double dsr1 = Double.parseDouble(map.get("dsr1"));
 		double dsr2 = Double.parseDouble(map.get("dsr2"));
 
-		DownSeriesFootballGameRunner.executeGames(reps, team1, dsr1, team2, dsr2);
+		DownSeriesFootballGameRunner.executeGames(reps, team1, dsr1, team2, dsr2, false);
 		return "Ran some down series!";
 	}
 }
