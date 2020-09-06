@@ -43,3 +43,31 @@ resource "aws_lambda_function" "down_series_football_game" {
     }
   }
 }
+
+resource "aws_s3_bucket" "webapp" {
+  bucket = "expected-points-webapp"
+  acl    = "public-read"
+  policy = file("policy.json")
+
+  website {
+    index_document = "index.html"
+    error_document = "error.html"
+
+    routing_rules = <<EOF
+[{
+    "Condition": {
+        "KeyPrefixEquals": "docs/"
+    },
+    "Redirect": {
+        "ReplaceKeyPrefixWith": "documents/"
+    }
+}]
+EOF
+  }
+}
+
+resource "aws_s3_bucket_object" "index" {
+  bucket = "expected-points-webapp"
+  key = "index.html"
+  source = "index.html"
+}
