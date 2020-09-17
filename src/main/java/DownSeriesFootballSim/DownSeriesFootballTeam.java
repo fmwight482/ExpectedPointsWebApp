@@ -39,7 +39,7 @@ public class DownSeriesFootballTeam {
 
 	public DownSeriesFootballTeam(String aName, double aDSR, Random aRand) {
 		teamId = nextTeamId;
-		nextTeamId++;
+		nextTeamId = (nextTeamId + 1) % 2;
 		name = aName;
 		rand = aRand;
 		dsr = aDSR;
