@@ -16,6 +16,11 @@ resource "aws_lambda_function" "down_series_football_game" {
   source_code_hash = filebase64sha256("../target/ExpectedPointsWebApp-${local.maven-version}.jar")
 
   runtime = "java11"
+
+  depends_on = [
+    aws_iam_role_policy_attachment.lambda_logs,
+    aws_cloudwatch_log_group.down_series_football_game,
+  ]
 }
 
 resource "aws_lambda_permission" "apigw_lambda" {
@@ -25,6 +30,11 @@ resource "aws_lambda_permission" "apigw_lambda" {
   principal     = "apigateway.amazonaws.com"
 
   source_arn = "arn:aws:execute-api:${local.region}:${local.accountId}:${aws_api_gateway_rest_api.expected_points_api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.points.path}"
+}
+
+resource "aws_cloudwatch_log_group" "down_series_football_game" {
+  name              = "/aws/lambda/down_series_football_game"
+  retention_in_days = 14
 }
 
 resource "aws_s3_bucket" "webapp" {
