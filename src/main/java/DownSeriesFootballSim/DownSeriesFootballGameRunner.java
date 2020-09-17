@@ -11,6 +11,8 @@ public class DownSeriesFootballGameRunner {
 		DownSeriesFootballTeam team1 = new DownSeriesFootballTeam(name1, dsr1, rand);
 		DownSeriesFootballTeam team2 = new DownSeriesFootballTeam(name2, dsr2, rand);
 
+		DownSeriesState.setReps(reps);
+
 		DownSeriesFootballGame game = new DownSeriesFootballGame(team1, team2, rand);
 
 		// teams 0-1, yard lines 1-99, no value at 0 index

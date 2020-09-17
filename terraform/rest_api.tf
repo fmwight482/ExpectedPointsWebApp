@@ -15,7 +15,7 @@ resource "aws_api_gateway_resource" "points" {
 resource "aws_api_gateway_method" "method" {
   rest_api_id   = aws_api_gateway_rest_api.expected_points_api.id
   resource_id   = aws_api_gateway_resource.points.id
-  http_method   = "GET"
+  http_method   = "POST"
   authorization = "NONE"
 }
 
@@ -51,6 +51,8 @@ resource "aws_api_gateway_method_settings" "general_settings" {
   rest_api_id = aws_api_gateway_rest_api.expected_points_api.id
   stage_name  = aws_api_gateway_deployment.test_deployment.stage_name
   method_path = "*/*"
+
+  depends_on = [aws_api_gateway_deployment.test_deployment]
 
   settings {
     # Enable CloudWatch logging and metrics

@@ -8,7 +8,7 @@ public class DownSeriesState {
 	 * The number of terminating series involving this state before we consider it's expected point value
 	 * to be final. 100,000 seems to give reliable results.
 	 */
-	private static final int reps = 100000;
+	private static int reps = 100000;
 
 	private final String team;
 	private final int yardLine;
@@ -20,6 +20,13 @@ public class DownSeriesState {
 	public DownSeriesState(String team, int yardLine) {
 		this.team = team;
 		this.yardLine = yardLine;
+	}
+
+	/**
+	 * @param count the number of reps required to finalize an expected points value, for this specific execution
+	 */
+	public static void setReps(int count) {
+		reps = count;
 	}
 
 	/**
