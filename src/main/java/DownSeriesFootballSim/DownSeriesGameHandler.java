@@ -41,9 +41,9 @@ public class DownSeriesGameHandler implements RequestHandler<Map<String, Object>
 		JSONObject resp = new JSONObject();
 		JSONObject headers = new JSONObject();
 		headers.put("Content-Type", "application/json");
-		resp.put("StatusCode", 200);
+		resp.put("statusCode", 200);
 		resp.put("headers", headers);
-		resp.put("body", values);
+		resp.put("body", Arrays.deepToString(values));
 		resp.put("isBase64Encoded", false);
 		return resp.toString();
 	}
