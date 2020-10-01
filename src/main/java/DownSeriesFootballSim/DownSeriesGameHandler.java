@@ -8,10 +8,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DownSeriesGameHandler implements RequestHandler<Map<String, Object>, String> {
+public class DownSeriesGameHandler implements RequestHandler<Map<String, Object>, LambdaResponse> {
 
 	@Override
-	public String handleRequest(Map<String, Object> map, Context context) {
+	public LambdaResponse handleRequest(Map<String, Object> map, Context context) {
 		Map<String, String> paramMap;
 		if (map.containsKey("queryStringParameters")) {
 			paramMap = (Map<String, String>)(map.get("queryStringParameters"));
@@ -37,14 +37,13 @@ public class DownSeriesGameHandler implements RequestHandler<Map<String, Object>
 		return DownSeriesFootballGameRunner.executeGames(reps, team1, dsr1, team2, dsr2, false);
 	}
 
-	private String jsonResponse(Double[][] values) {
-		JSONObject resp = new JSONObject();
-		JSONObject headers = new JSONObject();
+	private LambdaResponse jsonResponse(Double[][] values) {
+		String body = Arrays.deepToString(values);
+		int statusCode = 200;
+		boolean encoded = false;
+		Map<String, String> headers = new HashMap<>();
 		headers.put("Content-Type", "application/json");
-		resp.put("statusCode", 200);
-		resp.put("headers", headers);
-		resp.put("body", Arrays.deepToString(values));
-		resp.put("isBase64Encoded", false);
-		return resp.toString();
+		LambdaResponse resp = new LambdaResponse(body, statusCode, headers, encoded);
+		return resp;
 	}
 }
